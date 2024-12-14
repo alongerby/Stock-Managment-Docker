@@ -1,0 +1,130 @@
+from datetime import datetime
+import uuid
+from flask import Blueprint, jsonify, request
+
+stocks_bp = Blueprint('stocks', __name__)
+
+
+@stocks_bp.route('/', methods=['GET'])
+def get_stocks():
+    try:
+        query_params = request.args.to_dict()
+        if not query_params:
+            return jsonify(stockDB), 200
+
+        filtered_stocks = stockDB
+
+        for field, value in query_params.items():
+            filtered_stocks = [stock for stock in filtered_stocks if str(stock.get(field)) == value]
+
+        return jsonify(filtered_stocks), 200
+
+    except Exception as e:
+        return jsonify({"server error": str(e)}), 500
+
+
+@stocks_bp.route('/', methods=['POST'])
+def create_stock():
+    try:
+        if request.content_type != 'application/json':
+            return jsonify({"error": "Expected application/json media type"}), 415
+
+        payload = request.get_json()
+        if not payload:
+            return jsonify({"error": "Malformed data"}), 400
+
+        required_fields = ['symbol', 'purchase_price', 'shares']
+
+        for field in required_fields:
+            if field not in payload:
+                return jsonify({"error": "Malformed data"}), 400
+
+        for stock in stockDB:
+            if stock["symbol"] == payload["symbol"]:
+                return jsonify({"error": "Malformed data"}), 400
+
+        if not isinstance(payload['symbol'], str) or not isinstance(payload['purchase_price'],
+                                                                    (int, float)) or not isinstance(payload['shares'],
+                                                                                                    int):
+            return jsonify({"error": "Malformed data"}), 400
+
+        stock_id = str(uuid.uuid4())
+        name = payload.get('name', 'NA')
+        purchase_date = payload.get('purchase_date', 'NA')
+        if not validate_date(purchase_date):
+            return jsonify({"error": "Malformed data"}), 400
+
+        stock = {
+            'id': stock_id,
+            'symbol': payload['symbol'].upper(),
+            'purchase_price': round(payload['purchase_price'], 2),
+            'shares': payload['shares'],
+            'name': name,
+            'purchase_date': purchase_date
+        }
+        stockDB.append(stock)
+
+        return jsonify({'id': stock_id}), 201
+
+    except Exception as e:
+        return jsonify({"server error": str(e)}), 500
+
+
+@stocks_bp.route('/<string:id>', methods=['GET'])
+def get_stock(id):
+    try:
+        for stock in stockDB:
+            if stock['id'] == id:
+                return jsonify(stock), 200
+        return jsonify({'error': "Not found"}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@stocks_bp.route('/<string:id>', methods=['PUT'])
+def update_stock(id):
+    try:
+        if request.content_type != 'application/json':
+            return jsonify({"error": "Expected application/json media type"}), 415
+        payload = request.get_json()
+        if not payload:
+            return jsonify({"error": "Malformed data"}), 400
+        if not payload['id'] or payload['id'] != id:
+            return jsonify({"error": "Malformed data"}), 400
+        stock = next((s for s in stockDB if s['id'] == id), None)
+        if not stock:
+            return jsonify({"error": "Not found"}), 404
+
+        required_fields = ['id', 'symbol', 'purchase_price', 'shares', 'name', 'purchase_date']
+        for field in required_fields:
+            if field not in payload:
+                return jsonify({"error": "Malformed data"}), 400
+            if field == "purchase_date" and not validate_date(payload[field]):
+                return jsonify({"error": "Malformed data"}), 400
+            stock[field] = payload[field]
+        return jsonify({"id": stock['id']}), 200
+    except Exception as e:
+        return jsonify({"server error": str(e)}), 500
+
+
+@stocks_bp.route('/<string:id>', methods=['DELETE'])
+def delete_stock(id):
+    try:
+        for stock in stockDB:
+            if stock['id'] == id:
+                stockDB.remove(stock)
+                return "", 204
+        return jsonify({'error': "Not found"}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+def validate_date(date_string):
+    if date_string == 'NA':
+        return True
+
+    try:
+        datetime.strptime(date_string, "%d-%m-%Y")
+        return True
+    except ValueError:
+        return False
