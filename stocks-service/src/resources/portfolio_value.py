@@ -1,14 +1,15 @@
 from datetime import datetime
-from flask import Blueprint, jsonify, requests
+from flask import Blueprint, jsonify, requests, current_app
 
 portfolio_value_bp = Blueprint('portfolio-value', __name__)
-
+stock_collection = current_app.config["COLLECTION"]
+API_KEY = current_app.config["API_KEY"]
 
 @portfolio_value_bp.route('/', methods=['GET'])
 def get_portfolio_value():
     try:
         portfolio_value = 0
-        for stock in stockDB:
+        for stock in stock_collection.find({}, {"symbol": 1}):
             symbol = stock['symbol']
             api_url = f'https://api.api-ninjas.com/v1/stockprice?ticker={symbol}'
             response = requests.get(api_url, headers={'X-Api-Key': API_KEY})

@@ -1,8 +1,9 @@
 from datetime import datetime
 import uuid
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, current_app
 
 stocks_bp = Blueprint('stocks', __name__)
+stock_collection = current_app.config["COLLECTION"]
 
 
 @stocks_bp.route('/', methods=['GET'])
@@ -10,12 +11,12 @@ def get_stocks():
     try:
         query_params = request.args.to_dict()
         if not query_params:
-            return jsonify(stockDB), 200
+            return stock_collection.find(), 200
 
-        filtered_stocks = stockDB
+        filtered_stocks = []
 
         for field, value in query_params.items():
-            filtered_stocks = [stock for stock in filtered_stocks if str(stock.get(field)) == value]
+            filtered_stocks = filtered_stocks + list(stock_collection.find({field: value}))
 
         return jsonify(filtered_stocks), 200
 
@@ -39,9 +40,8 @@ def create_stock():
             if field not in payload:
                 return jsonify({"error": "Malformed data"}), 400
 
-        for stock in stockDB:
-            if stock["symbol"] == payload["symbol"]:
-                return jsonify({"error": "Malformed data"}), 400
+        if stock_collection.find_one({'symbol': payload['symbol']}):
+            return jsonify({"error": "Malformed data"}), 400
 
         if not isinstance(payload['symbol'], str) or not isinstance(payload['purchase_price'],
                                                                     (int, float)) or not isinstance(payload['shares'],
@@ -62,7 +62,7 @@ def create_stock():
             'name': name,
             'purchase_date': purchase_date
         }
-        stockDB.append(stock)
+        stock_collection.insert_one(stock)
 
         return jsonify({'id': stock_id}), 201
 
@@ -73,9 +73,9 @@ def create_stock():
 @stocks_bp.route('/<string:id>', methods=['GET'])
 def get_stock(id):
     try:
-        for stock in stockDB:
-            if stock['id'] == id:
-                return jsonify(stock), 200
+        stock = stock_collection.find_one({'id': id})
+        if stock:
+            return jsonify(stock), 200
         return jsonify({'error': "Not found"}), 404
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -91,18 +91,22 @@ def update_stock(id):
             return jsonify({"error": "Malformed data"}), 400
         if not payload['id'] or payload['id'] != id:
             return jsonify({"error": "Malformed data"}), 400
-        stock = next((s for s in stockDB if s['id'] == id), None)
+        stock = stock_collection.find_one({'id': id})
         if not stock:
             return jsonify({"error": "Not found"}), 404
 
         required_fields = ['id', 'symbol', 'purchase_price', 'shares', 'name', 'purchase_date']
         for field in required_fields:
             if field not in payload:
-                return jsonify({"error": "Malformed data"}), 400
-            if field == "purchase_date" and not validate_date(payload[field]):
-                return jsonify({"error": "Malformed data"}), 400
+                return jsonify({"error": f"Malformed data: Missing {field}"}), 400
             stock[field] = payload[field]
-        return jsonify({"id": stock['id']}), 200
+        if '_id' in stock:
+            del stock['_id']
+        result = stock_collection.update_one({'id': id, }, {'$set': stock})
+        if result.modified_count > 0:
+            return jsonify({"id": stock['id']}), 200
+        else:
+            raise Exception
     except Exception as e:
         return jsonify({"server error": str(e)}), 500
 
@@ -110,13 +114,13 @@ def update_stock(id):
 @stocks_bp.route('/<string:id>', methods=['DELETE'])
 def delete_stock(id):
     try:
-        for stock in stockDB:
-            if stock['id'] == id:
-                stockDB.remove(stock)
-                return "", 204
-        return jsonify({'error': "Not found"}), 404
+        result = stock_collection.delete_one({"id": id})
+        if result.deleted_count == 0:
+            return jsonify({'error': "Not found"}), 404
+        return jsonify({''}), 204
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 
 def validate_date(date_string):

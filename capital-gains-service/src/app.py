@@ -1,7 +1,5 @@
 from flask import Flask
-from resources.stock_value import stock_value_bp
-from resources.stocks import stocks_bp
-from resources.portfolio_value import portfolio_value_bp
+from resources.capital_gains import captial_gains_bp
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from dotenv import load_dotenv
@@ -13,15 +11,12 @@ uri = os.getenv('URI')
 collection = os.getenv('COLLECTION')
 API_KEY = os.getenv('API_KEY')
 
-app.register_blueprint(stock_value_bp, url_prefix='/stock-value')
-app.register_blueprint(stocks_bp, url_prefix='/stocks')
-app.register_blueprint(portfolio_value_bp, url_prefix='/portfolio-value')
-
+app.register_blueprint(captial_gains_bp, url_prefix='/capital-gains')
 client = MongoClient(uri, server_api=ServerApi('1'))
 db = client["portfolio"]
 app.config["DB"] = db
 app.config["COLLECTION"] = db[collection]
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8000)
+    app.run(host='0.0.0.0', port=8080)
 

@@ -1,2 +1,4 @@
 flask
 requests
+pymongo
+load_dotenv
