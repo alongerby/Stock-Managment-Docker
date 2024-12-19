@@ -5,6 +5,7 @@ from flask import Blueprint, jsonify, request, current_app
 stocks_bp = Blueprint('stocks', __name__)
 TYPE_CASTS = {"shares": int, "purchase_price": float}
 
+
 def get_stock_collection():
     return current_app.config["COLLECTION"]
 
@@ -26,7 +27,7 @@ def get_stocks():
                 filter_query[field] = value
 
         # Query the database with the constructed filter
-        filtered_stocks = list(stock_collection.find(filter_query, {exclude _id}))
+        filtered_stocks = list(stock_collection.find(filter_query, {"_id": 0}))
 
         return jsonify(filtered_stocks), 200
 
@@ -86,7 +87,7 @@ def create_stock():
 def get_stock(id):
     try:
         stock_collection = get_stock_collection()
-        stock = stock_collection.find_one({'id': id})
+        stock = stock_collection.find_one({'id': id}, {"_id", 0})
         if stock:
             return jsonify(stock), 200
         return jsonify({'error': "Not found"}), 404
@@ -135,7 +136,6 @@ def delete_stock(id):
         return jsonify({''}), 204
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
 
 
 def validate_date(date_string):
