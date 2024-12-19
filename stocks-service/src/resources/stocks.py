@@ -3,20 +3,30 @@ import uuid
 from flask import Blueprint, jsonify, request, current_app
 
 stocks_bp = Blueprint('stocks', __name__)
-stock_collection = current_app.config["COLLECTION"]
+TYPE_CASTS = {"shares": int, "purchase_price": float}
+
+def get_stock_collection():
+    return current_app.config["COLLECTION"]
 
 
 @stocks_bp.route('/', methods=['GET'])
 def get_stocks():
     try:
+        stock_collection = get_stock_collection()
         query_params = request.args.to_dict()
         if not query_params:
-            return stock_collection.find(), 200
+            stocks = list(stock_collection.find())  # Convert cursor to list
+            return jsonify(stocks), 200
 
-        filtered_stocks = []
-
+        filter_query = {}
         for field, value in query_params.items():
-            filtered_stocks = filtered_stocks + list(stock_collection.find({field: value}))
+            if field in TYPE_CASTS:
+                filter_query[field] = TYPE_CASTS[field](value)
+            else:
+                filter_query[field] = value
+
+        # Query the database with the constructed filter
+        filtered_stocks = list(stock_collection.find(filter_query, {exclude _id}))
 
         return jsonify(filtered_stocks), 200
 
@@ -27,6 +37,7 @@ def get_stocks():
 @stocks_bp.route('/', methods=['POST'])
 def create_stock():
     try:
+        stock_collection = get_stock_collection()
         if request.content_type != 'application/json':
             return jsonify({"error": "Expected application/json media type"}), 415
 
@@ -55,6 +66,7 @@ def create_stock():
             return jsonify({"error": "Malformed data"}), 400
 
         stock = {
+            '_id': stock_id,
             'id': stock_id,
             'symbol': payload['symbol'].upper(),
             'purchase_price': round(payload['purchase_price'], 2),
@@ -73,6 +85,7 @@ def create_stock():
 @stocks_bp.route('/<string:id>', methods=['GET'])
 def get_stock(id):
     try:
+        stock_collection = get_stock_collection()
         stock = stock_collection.find_one({'id': id})
         if stock:
             return jsonify(stock), 200
@@ -84,6 +97,7 @@ def get_stock(id):
 @stocks_bp.route('/<string:id>', methods=['PUT'])
 def update_stock(id):
     try:
+        stock_collection = get_stock_collection()
         if request.content_type != 'application/json':
             return jsonify({"error": "Expected application/json media type"}), 415
         payload = request.get_json()
@@ -114,6 +128,7 @@ def update_stock(id):
 @stocks_bp.route('/<string:id>', methods=['DELETE'])
 def delete_stock(id):
     try:
+        stock_collection = get_stock_collection()
         result = stock_collection.delete_one({"id": id})
         if result.deleted_count == 0:
             return jsonify({'error': "Not found"}), 404

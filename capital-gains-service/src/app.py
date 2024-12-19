@@ -16,6 +16,7 @@ client = MongoClient(uri, server_api=ServerApi('1'))
 db = client["portfolio"]
 app.config["DB"] = db
 app.config["COLLECTION"] = db[collection]
+captial_gains_bp.stock_collection = app.config["COLLECTION"]
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
