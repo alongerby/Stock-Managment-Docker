@@ -1,12 +1,26 @@
 version: '3.8'
 
 services:
+  capital-gains:
+    build:
+      context: ./capital-gains-service
+    container_name: capital-gains
+    ports:
+      - "5003:8080"  # Expose capital-gains on host port 5000
+    expose:
+    - 8080
+    depends_on:
+      - mongodb
+    restart: always
+
   stocks1:
     build:
       context: ./stocks-service
     container_name: stocks1
     ports:
-      - "5001:5000"  # Expose stocks1 on host port 5001
+      - "5001:8000"  # Expose stocks1 on host port 5001
+    expose:
+    - 8000
     environment:
       COLLECTION: stocks1  # Use collection for stocks1
     depends_on:
@@ -18,7 +32,9 @@ services:
       context: ./stocks-service
     container_name: stocks2
     ports:
-      - "5002:5000"  # Expose stocks2 on host port 5002
+      - "5002:8000"  # Expose stocks2 on host port 5002
+    expose:
+    - 8000
     environment:
       COLLECTION: stocks2  # Use collection for stocks2
     depends_on:
