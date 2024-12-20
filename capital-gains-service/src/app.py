@@ -7,7 +7,7 @@ import os
 app = Flask(__name__)
 
 load_dotenv()
-uri = os.getenv('URI')
+uri = "mongodb://mongodb:27017"
 API_KEY = os.getenv('API_KEY')
 
 app.register_blueprint(capital_gains_bp, url_prefix='/capital-gains')

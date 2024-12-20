@@ -4,13 +4,16 @@ services:
   capital-gains:
     build:
       context: ./capital-gains-service
+      dockerfile: Dockerfile
     container_name: capital-gains
     ports:
-      - "5003:8080"  # Expose capital-gains on host port 5000
+      - "5003:8080"
     expose:
     - 8080
     depends_on:
       - mongodb
+    volumes:
+      - ./common:/app/common
     restart: always
 
   stocks1:
@@ -18,13 +21,15 @@ services:
       context: ./stocks-service
     container_name: stocks1
     ports:
-      - "5001:8000"  # Expose stocks1 on host port 5001
+      - "5001:8000"
     expose:
     - 8000
     environment:
-      COLLECTION: stocks1  # Use collection for stocks1
+      COLLECTION: stocks1
     depends_on:
       - mongodb
+    volumes:
+      - ./common:/app/common
     restart: always
 
   stocks2:
@@ -32,13 +37,15 @@ services:
       context: ./stocks-service
     container_name: stocks2
     ports:
-      - "5002:8000"  # Expose stocks2 on host port 5002
+      - "5002:8000"
     expose:
     - 8000
     environment:
-      COLLECTION: stocks2  # Use collection for stocks2
+      COLLECTION: stocks2
     depends_on:
       - mongodb
+    volumes:
+      - ./common:/app/common
     restart: always
 
   mongodb:

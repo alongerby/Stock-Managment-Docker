@@ -9,7 +9,7 @@ import os
 app = Flask(__name__)
 
 load_dotenv()
-uri = os.getenv('URI')
+uri = "mongodb://mongodb:27017"
 collection = os.getenv('COLLECTION')
 API_KEY = os.getenv('API_KEY')
 
