@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  stocks1:
+    build:
+      context: ./stocks-service
+    container_name: stocks1
+    ports:
+      - "5001:5000"  # Expose stocks1 on host port 5001
+    environment:
+      COLLECTION: stocks1  # Use collection for stocks1
+    depends_on:
+      - mongodb
+    restart: always
+
+  stocks2:
+    build:
+      context: ./stocks-service
+    container_name: stocks2
+    ports:
+      - "5002:5000"  # Expose stocks2 on host port 5002
+    environment:
+      COLLECTION: stocks2  # Use collection for stocks2
+    depends_on:
+      - mongodb
+    restart: always
+
+  mongodb:
+    image: mongo:6.0
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    restart: always
+
+volumes:
+  mongo_data:
