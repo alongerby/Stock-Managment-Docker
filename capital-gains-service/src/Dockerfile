@@ -2,8 +2,11 @@ FROM python:alpine3.17
 
 WORKDIR /app
 
-COPY ../common /app/common
-COPY . /app
+COPY /common /app
+
+COPY ./capital-gains-service /app
+
+COPY capital-gains-service/src/requirements.txt /app
 
 RUN pip install --no-cache-dir -r requirements.txt
 
@@ -13,4 +16,4 @@ ENV URI=mongodb+srv://alongerby007:Z2-t-rg2i2jhfF7@portfolio.3d14i.mongodb.net/?
 
 EXPOSE 5000
 
-CMD ["flask", "run","--host=0.0.0.0"]
+CMD ["python", "capital-gains-service/src/app.py"]
