@@ -7,13 +7,13 @@ TYPE_CASTS = {"shares": int, "purchase_price": float}
 
 
 def get_stock_collection():
-    return current_app.config["COLLECTION"]
+    return
 
 
 @stocks_bp.route('/', methods=['GET'])
 def get_stocks():
     try:
-        stock_collection = get_stock_collection()
+        stock_collection = stocks_bp.stock_collection
         query_params = request.args.to_dict()
         if not query_params:
             stocks = list(stock_collection.find())  # Convert cursor to list
@@ -38,7 +38,7 @@ def get_stocks():
 @stocks_bp.route('/', methods=['POST'])
 def create_stock():
     try:
-        stock_collection = get_stock_collection()
+        stock_collection = stocks_bp.stock_collection
         if request.content_type != 'application/json':
             return jsonify({"error": "Expected application/json media type"}), 415
 
@@ -86,7 +86,7 @@ def create_stock():
 @stocks_bp.route('/<string:id>', methods=['GET'])
 def get_stock(id):
     try:
-        stock_collection = get_stock_collection()
+        stock_collection = stocks_bp.stock_collection
         stock = stock_collection.find_one({'id': id}, {"_id", 0})
         if stock:
             return jsonify(stock), 200
@@ -98,7 +98,7 @@ def get_stock(id):
 @stocks_bp.route('/<string:id>', methods=['PUT'])
 def update_stock(id):
     try:
-        stock_collection = get_stock_collection()
+        stock_collection = stocks_bp.stock_collection
         if request.content_type != 'application/json':
             return jsonify({"error": "Expected application/json media type"}), 415
         payload = request.get_json()
@@ -129,7 +129,7 @@ def update_stock(id):
 @stocks_bp.route('/<string:id>', methods=['DELETE'])
 def delete_stock(id):
     try:
-        stock_collection = get_stock_collection()
+        stock_collection = stocks_bp.stock_collection
         result = stock_collection.delete_one({"id": id})
         if result.deleted_count == 0:
             return jsonify({'error': "Not found"}), 404

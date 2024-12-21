@@ -4,7 +4,7 @@ services:
   capital-gains:
     build:
       context: .
-      dockerfile: capital-gains-service/src/Dockerfile # Dockerfile is inside src directory
+      dockerfile: capital_gains_service/src/Dockerfile
     container_name: capital-gains
     ports:
       - "5003:8080"
@@ -13,13 +13,13 @@ services:
     depends_on:
       - mongodb
     volumes:
-      - ./common:/app/common
+      - ./common:/app/src/common
     restart: always
 
   stocks1:
     build:
-      context: ./stocks-service # Build context is stocks-service
-      dockerfile: src/Dockerfile # Dockerfile is inside src directory
+      context: ./stocks-service
+      dockerfile: src/Dockerfile
     container_name: stocks1
     ports:
       - "5001:8000"

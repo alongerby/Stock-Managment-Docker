@@ -1,3 +1,5 @@
+import logging
+
 from flask import Flask
 from resources.stock_value import stock_value_bp
 from resources.stocks import stocks_bp
@@ -23,6 +25,7 @@ portfolio_value_bp.stock_collection = db[collection]
 portfolio_value_bp.API = API_KEY
 stock_value_bp.API = API_KEY
 stock_value_bp.stock_collection = db[collection]
+stocks_bp.stock_collection = db[collection]
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000)
