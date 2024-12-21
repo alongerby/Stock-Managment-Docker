@@ -3,21 +3,18 @@ from flask import Blueprint, jsonify
 import requests
 
 portfolio_value_bp = Blueprint('portfolio-value', __name__)
-# stock_collection = current_app.config["COLLECTION"]
-# API_KEY = current_app.config["API_KEY"]
-
 
 @portfolio_value_bp.route('/', methods=['GET'])
 def get_portfolio_value():
     try:
         portfolio_value = 0
-        for stock in portfolio_value_bp.stock_collection.find({}, {"symbol": 1}):
+        for stock in portfolio_value_bp.stock_collection.find({}, {"symbol": 1, "shares": 1}):
             symbol = stock['symbol']
             api_url = f'https://api.api-ninjas.com/v1/stockprice?ticker={symbol}'
-            response = requests.get(api_url, headers={'X-Api-Key': portfolio_value_bp.API_KEY})
+            response = requests.get(api_url, headers={'X-Api-Key': portfolio_value_bp.API})
             if response.status_code == requests.codes.ok:
                 if response.json():
-                    portfolio_value += response.json().get('stock value')
+                    portfolio_value += response.json().get('price') * stock['shares']
             else:
                 return jsonify({"server error": "API response code " + str(response.status_code)}), 500
         return jsonify({

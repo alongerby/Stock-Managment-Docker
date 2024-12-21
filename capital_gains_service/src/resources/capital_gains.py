@@ -3,8 +3,8 @@ import requests
 from flask import Blueprint, jsonify, request
 
 capital_gains_bp = Blueprint('capital-gains', __name__)
-stock1_value_api = "http://stock1:8000/stock-value/"
-stock2_value_api = "http://stock2:8000/stock-value/"
+stock1_value_api = "http://nginx/stock1/stock-value/"
+stock2_value_api = "http://stocks2:8000/stock-value/"
 VALID_QUERY = ["portfolio", "numsharesgt", "numshareslt"]
 
 @capital_gains_bp.route('/', methods=['GET'])
@@ -44,7 +44,7 @@ def capital_gains_query(query_params: dict):
         if query_params["portfolio"] == "stocks1":
             capital_gains = {"stocks1": capital_gains["stocks1"], "stocks2": []}
         elif query_params["portfolio"] == "stocks2":
-            capital_gains = {"stocks2": [], "stocks2": capital_gains["stocks2"]}
+            capital_gains = {"stocks1": [], "stocks2": capital_gains["stocks2"]}
         else:
             return res.malformed_res()
 
@@ -75,7 +75,7 @@ def capital_gains_query(query_params: dict):
 
 
 
-def calculate_capital_gain(portfolio_stocks: list, api_uri: str):
+def calculate_capital_gain(portfolio_stocks: dict, api_uri: str):
     capital_gain = 0
     for stock in portfolio_stocks:
         id = stock["id"]

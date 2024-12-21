@@ -16,13 +16,30 @@ services:
       - ./common:/app/src/common
     restart: always
 
-  stocks1:
+  stocks1_instance1:
     build:
       context: ./stocks-service
       dockerfile: src/Dockerfile
-    container_name: stocks1
+    container_name: stocks1_instance1
     ports:
       - "5001:8000"
+    expose:
+      - 8000
+    environment:
+      COLLECTION: stocks1
+    depends_on:
+      - mongodb
+    volumes:
+      - ./common:/app/common # Mount common directory into /app/common
+    restart: always
+
+  stocks1_instance2:
+    build:
+      context: ./stocks-service
+      dockerfile: src/Dockerfile
+    container_name: stocks1_instance2
+    ports:
+      - "5005:8000"
     expose:
       - 8000
     environment:
@@ -65,7 +82,8 @@ services:
     ports:
       - "80:80" # NGINX accessible on port 80
     depends_on:
-      - stocks1
+      - stocks1_instance1
+      - stocks1_instance2
       - stocks2
       - capital-gains
     volumes:

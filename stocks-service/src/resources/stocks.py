@@ -16,7 +16,7 @@ def get_stocks():
         stock_collection = stocks_bp.stock_collection
         query_params = request.args.to_dict()
         if not query_params:
-            stocks = list(stock_collection.find())  # Convert cursor to list
+            stocks = list(stock_collection.find({}, {"_id": 0}))
             return jsonify(stocks), 200
 
         filter_query = {}
