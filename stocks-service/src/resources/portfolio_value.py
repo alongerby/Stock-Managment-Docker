@@ -8,7 +8,7 @@ portfolio_value_bp = Blueprint('portfolio-value', __name__)
 def get_portfolio_value():
     try:
         portfolio_value = 0
-        for stock in portfolio_value_bp.stock_collection.find({}, {"symbol": 1, "shares": 1}):
+        for stock in portfolio_value_bp.stock_collection.find({}, ["symbol", "shares"]):
             symbol = stock['symbol']
             api_url = f'https://api.api-ninjas.com/v1/stockprice?ticker={symbol}'
             response = requests.get(api_url, headers={'X-Api-Key': portfolio_value_bp.API})
@@ -19,7 +19,7 @@ def get_portfolio_value():
                 return jsonify({"server error": "API response code " + str(response.status_code)}), 500
         return jsonify({
             "date": datetime.now().strftime("%d-%m-%Y"),
-            "portfolio_value": portfolio_value
+            "portfolio_value": round(portfolio_value, 2)
         })
     except Exception as e:
         return jsonify({"server error": str(e)}), 500

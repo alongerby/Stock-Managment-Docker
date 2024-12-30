@@ -1,10 +1,10 @@
+import os
 from datetime import datetime
 import uuid
 from flask import Blueprint, jsonify, request, current_app
 
 stocks_bp = Blueprint('stocks', __name__)
 TYPE_CASTS = {"shares": int, "purchase_price": float}
-
 
 def get_stock_collection():
     return
@@ -87,7 +87,7 @@ def create_stock():
 def get_stock(id):
     try:
         stock_collection = stocks_bp.stock_collection
-        stock = stock_collection.find_one({'id': id}, {"_id", 0})
+        stock = stock_collection.find_one({'id': id}, {"_id": 0})
         if stock:
             return jsonify(stock), 200
         return jsonify({'error': "Not found"}), 404
@@ -104,9 +104,9 @@ def update_stock(id):
         payload = request.get_json()
         if not payload:
             return jsonify({"error": "Malformed data"}), 400
-        if not payload['id'] or payload['id'] != id:
+        if not payload.get('id') or payload.get('id') != id:
             return jsonify({"error": "Malformed data"}), 400
-        stock = stock_collection.find_one({'id': id})
+        stock = stock_collection.find_one({'id': id}, {"_id": 0})
         if not stock:
             return jsonify({"error": "Not found"}), 404
 
@@ -115,8 +115,6 @@ def update_stock(id):
             if field not in payload:
                 return jsonify({"error": f"Malformed data: Missing {field}"}), 400
             stock[field] = payload[field]
-        if '_id' in stock:
-            del stock['_id']
         result = stock_collection.update_one({'id': id, }, {'$set': stock})
         if result.modified_count > 0:
             return jsonify({"id": stock['id']}), 200
@@ -137,6 +135,10 @@ def delete_stock(id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
+@stocks_bp.route('/kill', methods=['GET'])
+def kill_container():
+    exit(1)
 
 def validate_date(date_string):
     if date_string == 'NA':

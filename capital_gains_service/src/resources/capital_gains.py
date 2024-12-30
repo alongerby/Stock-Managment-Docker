@@ -83,7 +83,7 @@ def calculate_capital_gain(portfolio_stocks: dict, api_uri: str):
         data = response.json()
         capital_gain += data["stock value"] - stock["purchase_price"] * stock["shares"]
 
-    return capital_gain
+    return round(capital_gain, 2)
 
 
 
