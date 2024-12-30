@@ -1,13 +1,11 @@
 import os
+import signal
 from datetime import datetime
 import uuid
 from flask import Blueprint, jsonify, request, current_app
 
 stocks_bp = Blueprint('stocks', __name__)
 TYPE_CASTS = {"shares": int, "purchase_price": float}
-
-def get_stock_collection():
-    return
 
 
 @stocks_bp.route('/', methods=['GET'])
@@ -136,9 +134,9 @@ def delete_stock(id):
         return jsonify({'error': str(e)}), 500
 
 
-@stocks_bp.route('/kill', methods=['GET'])
+@stocks_bp.route('/kill', methods=["GET"])
 def kill_container():
-    exit(1)
+    os._exit(1)
 
 def validate_date(date_string):
     if date_string == 'NA':
