@@ -2,13 +2,9 @@ from flask import Flask
 from resources.capital_gains import capital_gains_bp
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
-from dotenv import load_dotenv
-import os
 app = Flask(__name__)
 
-load_dotenv()
 uri = "mongodb://mongodb:27017"
-API_KEY = os.getenv('API_KEY')
 
 app.register_blueprint(capital_gains_bp, url_prefix='/capital-gains')
 client = MongoClient(uri, server_api=ServerApi('1'))
