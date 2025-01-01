@@ -97,6 +97,9 @@ def get_stock(id):
 def update_stock(id):
     try:
         stock_collection = stocks_bp.stock_collection
+        stock = stock_collection.find_one({'id': id}, {"_id": 0})
+        if not stock:
+            return jsonify({"error": "Not found"}), 404
         if request.content_type != 'application/json':
             return jsonify({"error": "Expected application/json media type"}), 415
         payload = request.get_json()
@@ -104,11 +107,8 @@ def update_stock(id):
             return jsonify({"error": "Malformed data"}), 400
         if not payload.get('id') or payload.get('id') != id:
             return jsonify({"error": "Malformed data"}), 400
-        stock = stock_collection.find_one({'id': id}, {"_id": 0})
-        if not stock:
-            return jsonify({"error": "Not found"}), 404
 
-        required_fields = ['id', 'symbol', 'purchase_price', 'shares', 'name', 'purchase_date']
+        required_fields = ['id', 'symbol', 'purchase price', 'shares', 'name', 'purchase date']
         for field in required_fields:
             if field not in payload:
                 return jsonify({"error": f"Malformed data: Missing {field}"}), 400
