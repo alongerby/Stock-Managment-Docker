@@ -111,7 +111,7 @@ def update_stock(id):
         required_fields = ['id', 'symbol', 'purchase price', 'shares', 'name', 'purchase date']
         for field in required_fields:
             if field not in payload:
-                return jsonify({"error": f"Malformed data: Missing {field}"}), 400
+                return jsonify({"error": "Malformed data"}), 400
             stock[field] = payload[field]
         result = stock_collection.update_one({'id': id, }, {'$set': stock})
         if result.modified_count > 0:
