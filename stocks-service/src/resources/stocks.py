@@ -5,7 +5,7 @@ import uuid
 from flask import Blueprint, jsonify, request, current_app
 
 stocks_bp = Blueprint('stocks', __name__)
-TYPE_CASTS = {"shares": int, "purchase_price": float}
+TYPE_CASTS = {"shares": int, "purchase price": float}
 
 
 @stocks_bp.route('/', methods=['GET'])
@@ -44,7 +44,7 @@ def create_stock():
         if not payload:
             return jsonify({"error": "Malformed data"}), 400
 
-        required_fields = ['symbol', 'purchase_price', 'shares']
+        required_fields = ['symbol', 'purchase price', 'shares']
 
         for field in required_fields:
             if field not in payload:
@@ -53,14 +53,14 @@ def create_stock():
         if stock_collection.find_one({'symbol': payload['symbol']}):
             return jsonify({"error": "Malformed data"}), 400
 
-        if not isinstance(payload['symbol'], str) or not isinstance(payload['purchase_price'],
+        if not isinstance(payload['symbol'], str) or not isinstance(payload['purchase price'],
                                                                     (int, float)) or not isinstance(payload['shares'],
                                                                                                     int):
             return jsonify({"error": "Malformed data"}), 400
 
         stock_id = str(uuid.uuid4())
         name = payload.get('name', 'NA')
-        purchase_date = payload.get('purchase_date', 'NA')
+        purchase_date = payload.get('purchase date', 'NA')
         if not validate_date(purchase_date):
             return jsonify({"error": "Malformed data"}), 400
 
@@ -68,10 +68,10 @@ def create_stock():
             '_id': stock_id,
             'id': stock_id,
             'symbol': payload['symbol'].upper(),
-            'purchase_price': round(payload['purchase_price'], 2),
+            'purchase price': round(payload['purchase price'], 2),
             'shares': payload['shares'],
             'name': name,
-            'purchase_date': purchase_date
+            'purchase date': purchase_date
         }
         stock_collection.insert_one(stock)
 

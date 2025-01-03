@@ -19,7 +19,7 @@ def get_portfolio_value():
                 return jsonify({"server error": "API response code " + str(response.status_code)}), 500
         return jsonify({
             "date": datetime.now().strftime("%d-%m-%Y"),
-            "portfolio_value": round(portfolio_value, 2)
+            "portfolio value": round(portfolio_value, 2)
         })
     except Exception as e:
         return jsonify({"server error": str(e)}), 500

@@ -80,7 +80,7 @@ def calculate_capital_gain(portfolio_stocks: list, api_uri: str):
         id = stock["id"]
         response = requests.get(f"{api_uri}{id}")
         data = response.json()
-        capital_gain += data["stock value"] - stock["purchase_price"] * stock["shares"]
+        capital_gain += data["stock value"] - stock["purchase price"] * stock["shares"]
 
     return round(capital_gain, 2)
 
