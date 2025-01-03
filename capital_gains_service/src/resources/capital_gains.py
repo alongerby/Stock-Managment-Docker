@@ -3,7 +3,7 @@ import requests
 from flask import Blueprint, jsonify, request
 
 capital_gains_bp = Blueprint('capital-gains', __name__)
-stock1_value_api = "http://nginx/stocks1/stock-value/"
+stock1_value_api = "http://nginx:8081/stocks1/stock-value/"
 stock2_value_api = "http://stocks2:8000/stock-value/"
 VALID_QUERY = ["portfolio", "numsharesgt", "numshareslt"]
 

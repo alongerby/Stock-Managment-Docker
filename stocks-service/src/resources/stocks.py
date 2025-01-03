@@ -114,10 +114,8 @@ def update_stock(id):
                 return jsonify({"error": "Malformed data"}), 400
             stock[field] = payload[field]
         result = stock_collection.update_one({'id': id, }, {'$set': stock})
-        if result.modified_count > 0:
-            return jsonify({"id": stock['id']}), 200
-        else:
-            raise Exception
+        return jsonify({"id": stock['id']}), 200
+
     except Exception as e:
         return jsonify({"server error": str(e)}), 500
 
