@@ -114,10 +114,8 @@ def update_stock(id):
                 return jsonify({"error": "Malformed data"}), 400
             stock[field] = payload[field]
         result = stock_collection.update_one({'id': id, }, {'$set': stock})
-        if result.modified_count > 0:
-            return jsonify({"id": stock['id']}), 200
-        else:
-            raise Exception
+        return jsonify({"id": stock['id']}), 200
+
     except Exception as e:
         return jsonify({"server error": str(e)}), 500
 
@@ -129,14 +127,12 @@ def delete_stock(id):
         result = stock_collection.delete_one({"id": id})
         if result.deleted_count == 0:
             return jsonify({'error': "Not found"}), 404
-        return jsonify({''}), 204
+        return '', 204
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 
-@stocks_bp.route('/kill', methods=["GET"])
-def kill_container():
-    os._exit(1)
+
 
 def validate_date(date_string):
     if date_string == 'NA':

@@ -3,9 +3,8 @@ import requests
 from flask import Blueprint, jsonify, request
 
 capital_gains_bp = Blueprint('capital-gains', __name__)
-stock1_value_api = "http://nginx/stocks1/stock-value/"
-stock2_value_api = "http://stocks2:8000/stock-value/"
-VALID_QUERY = ["portfolio", "numsharesgt", "numshareslt"]
+stock1_value_api = "http://nginx:8081/stocks1/stock-value/"
+VALID_QUERY = ["numsharesgt", "numshareslt"]
 
 @capital_gains_bp.route('/', methods=['GET'])
 def get_capital_gains():
@@ -22,11 +21,9 @@ def get_capital_gains():
 
 def capital_gains_no_query():
     capital_gains = {
-        "stocks1": list(capital_gains_bp.stock1_collection.find()),
-        "stocks2": list(capital_gains_bp.stock2_collection.find())
+        "stocks1": list(capital_gains_bp.stock1_collection.find())
     }
-    capital_gain_sum = (calculate_capital_gain(capital_gains["stocks1"], stock1_value_api) +
-                        calculate_capital_gain(capital_gains["stocks2"], stock2_value_api))
+    capital_gain_sum = calculate_capital_gain(capital_gains["stocks1"], stock1_value_api)
     return capital_gain_sum
 
 
@@ -36,17 +33,8 @@ def capital_gains_query(query_params: dict):
             return res.malformed_res()
 
     capital_gains = {
-        "stocks1": list(capital_gains_bp.stock1_collection.find()),
-        "stocks2": list(capital_gains_bp.stock2_collection.find())
+        "stocks1": list(capital_gains_bp.stock1_collection.find())
     }
-
-    if "portfolio" in query_params:
-        if query_params["portfolio"] == "stocks1":
-            capital_gains = {"stocks1": capital_gains["stocks1"], "stocks2": []}
-        elif query_params["portfolio"] == "stocks2":
-            capital_gains = {"stocks1": [], "stocks2": capital_gains["stocks2"]}
-        else:
-            return res.malformed_res()
 
     if "numsharesgt" in query_params:
         try:
@@ -68,9 +56,7 @@ def capital_gains_query(query_params: dict):
         except ValueError:
             return res.malformed_res()
 
-    capital_gain_sum = (calculate_capital_gain(capital_gains["stocks1"], stock1_value_api) +
-                        calculate_capital_gain(capital_gains["stocks2"], stock2_value_api))
-
+    capital_gain_sum = calculate_capital_gain(capital_gains["stocks1"], stock1_value_api)
     return jsonify(capital_gain_sum), 200
 
 

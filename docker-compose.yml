@@ -33,40 +33,6 @@ services:
       - ./common:/app/common # Mount common directory into /app/common
     restart: always
 
-  stocks1_instance2:
-    build:
-      context: ./stocks-service
-      dockerfile: src/Dockerfile
-    container_name: stocks1_instance2
-    ports:
-      - "5005:8000"
-    expose:
-      - 8000
-    environment:
-      COLLECTION: stocks1
-    depends_on:
-      - mongodb
-    volumes:
-      - ./common:/app/common # Mount common directory into /app/common
-    restart: always
-
-  stocks2:
-    build:
-      context: ./stocks-service # Build context is stocks-service
-      dockerfile: src/Dockerfile # Dockerfile is inside src directory
-    container_name: stocks2
-    ports:
-      - "5002:8000"
-    expose:
-      - 8000
-    environment:
-      COLLECTION: stocks2
-    depends_on:
-      - mongodb
-    volumes:
-      - ./common:/app/common # Mount common directory into /app/common
-    restart: always
-
   mongodb:
     image: mongo:6.0
     container_name: mongodb
@@ -74,20 +40,6 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db # Persistent storage for MongoDB
-    restart: always
-
-  nginx:
-    image: nginx:latest
-    container_name: nginx
-    ports:
-      - "80:80" # NGINX accessible on port 80
-    depends_on:
-      - stocks1_instance1
-      - stocks1_instance2
-      - stocks2
-      - capital-gains
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro # Mount nginx.conf file
     restart: always
 
 volumes:

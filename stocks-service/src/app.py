@@ -8,6 +8,7 @@ from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from dotenv import load_dotenv
 import os
+
 app = Flask(__name__)
 
 load_dotenv()
@@ -27,6 +28,11 @@ stock_value_bp.API = API_KEY
 stock_value_bp.stock_collection = db[collection]
 stocks_bp.stock_collection = db[collection]
 
+
+@app.route('/kill', methods=["GET"])
+def kill_container():
+    os._exit(1)
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000)
-
