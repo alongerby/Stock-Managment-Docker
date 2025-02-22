@@ -23,7 +23,7 @@ jobs:
       - name: Build Docker Images via Docker Compose
         run: |
           docker compose build
-        # (If the build fails, the job will error and the log will only include the prior lines.)
+        # (If the build fails, this job fails and subsequent outputs won’t be set.)
 
       - name: Set Build Status
         id: set_build_status
@@ -47,6 +47,7 @@ jobs:
           docker compose up -d
           # Pause briefly to let containers start
           sleep 10
+          docker compose ps
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -127,19 +128,36 @@ jobs:
           path: response.txt
 
       - name: Generate Final Log File
+        if: always()
         run: |
-          {
-            # Line 1: current time (ISO minutes)
-            date -Iminutes
-            # Line 2: submitter names (update with your actual names)
-            echo "Alon Gerby"
-            # Line 3: build status from build job
-            echo "${{ needs.build.outputs.build_status }}"
-            # Line 4: container status from test job
-            echo "${{ needs.test.outputs.container_status }}"
-            # Line 5: test status from test job
-            echo "${{ needs.test.outputs.test_status }}"
-          } > log.txt
+          LOG_FILE="log.txt"
+          # Line 1: current time (ISO minutes)
+          date -Iminutes > $LOG_FILE
+          # Line 2: submitter names (update with your actual names)
+          echo "Alon Gerby" >> $LOG_FILE
+
+          # Check if the build job succeeded; if not, output only lines 1-3 and exit.
+          if [ -z "${{ needs.build.outputs.build_status }}" ]; then
+            echo "image not able to be built" >> $LOG_FILE
+            exit 0
+          else
+            echo "${{ needs.build.outputs.build_status }}" >> $LOG_FILE
+          fi
+
+          # Check if the container startup succeeded; if not, output line 4 and exit.
+          if [ -z "${{ needs.test.outputs.container_status }}" ]; then
+            echo "Container failed to run" >> $LOG_FILE
+            exit 0
+          else
+            echo "${{ needs.test.outputs.container_status }}" >> $LOG_FILE
+          fi
+
+          # Finally, output test status (line 5); if not set, mark tests as failed.
+          if [ -z "${{ needs.test.outputs.test_status }}" ]; then
+            echo "tests failed" >> $LOG_FILE
+          else
+            echo "${{ needs.test.outputs.test_status }}" >> $LOG_FILE
+          fi
 
       - name: Upload Log File Artifact
         uses: actions/upload-artifact@v4
