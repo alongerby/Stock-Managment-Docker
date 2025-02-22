@@ -245,6 +245,12 @@ jobs:
             echo "$res" >> response.txt
           done < query.txt
 
+      - name: Ensure response.txt exists
+        if: always()
+        run: |
+          # Create an empty response.txt if it doesn't exist
+          [ -f response.txt ] || touch response.txt
+
       - name: Upload Query Response Artifact
         if: always()
         uses: actions/upload-artifact@v4
