@@ -8,7 +8,8 @@ jobs:
     name: Build Docker Images
     runs-on: ubuntu-latest
     outputs:
-      log_file: ${{ steps.create_log_file.outputs.LOG_FILE  }}
+      build_status: ${{ steps.set_build_status.outputs.build_status }}
+      start_time: ${{ steps.get_start_time.outputs.start_time }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -44,12 +45,9 @@ jobs:
           else
             echo "$BUILD_STATUS" >> $LOG_FILE
           fi
-          # Set the step output for later jobs
-          echo "::set-output name=LOG_FILE::$(pwd)/$LOG_FILE"
-
 
       - name: Upload Log File Artifact
-        if: failure()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: log.txt
@@ -65,7 +63,6 @@ jobs:
     outputs:
       container_status: ${{ steps.set_container_status.outputs.container_status }}
       test_status: ${{ steps.set_test_status.outputs.test_status }}
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -75,7 +72,11 @@ jobs:
           docker compose up -d
           # Pause briefly to let containers start
           sleep 10
-          docker compose ps
+
+      - name: update Container Status
+        id: set_container_status
+        run: |
+          echo "container_status=Container up and running" >> $GITHUB_OUTPUT
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -93,15 +94,9 @@ jobs:
           # Run tests and capture output in a file
           pytest -v tests/assn4_tests.py > assn4_test_results.txt
 
-      - name: Set Container Status
-        id: set_container_status
-        run: |
-          echo "container_status=Container up and running" >> $GITHUB_OUTPUT
-
       - name: Set Test Status
         id: set_test_status
         run: |
-          # If pytest can fail, then your job might end early unless you handle the exit code
           echo "test_status=tests succeeded" >> $GITHUB_OUTPUT
 
 
@@ -112,10 +107,16 @@ jobs:
           name: assn4_test_results.txt
           path: assn4_test_results.txt
 
+      - name: Download log.txt
+        if: always()
+        uses: actions/download-artifact@v4
+        with:
+          name: log.txt
+
       - name: Update Log Artifact
         if: always()
         run: |
-          LOG_FILE=${{ needs.build.outputs.log_file }}
+          LOG_FILE="log.txt"
           if [ -z "${{ needs.test.outputs.container_status }}" ]; then
             echo "Container failed to run" >> $LOG_FILE
             exit 0
