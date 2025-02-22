@@ -109,7 +109,7 @@ jobs:
             "purchase price": 134.66,
             "purchase date": "18-06-2024",
             "shares": 7
-          }' http://localhost:5001/stocks
+          }' http://localhost:5001/stocks/
 
           curl -X POST -H "Content-Type: application/json" -d '{
             "name": "Apple Inc.",
@@ -117,7 +117,7 @@ jobs:
             "purchase price": 183.63,
             "purchase date": "22-02-2024",
             "shares": 19
-          }' http://localhost:5001/stocks
+          }' http://localhost:5001/stocks/
 
           curl -X POST -H "Content-Type: application/json" -d '{
             "name": "Alphabet Inc.",
@@ -125,7 +125,7 @@ jobs:
             "purchase price": 140.12,
             "purchase date": "24-10-2024",
             "shares": 14
-          }' http://localhost:5001/stocks
+          }' http://localhost:5001/stocks/
 
           curl -X POST -H "Content-Type: application/json" -d '{
             "name": "Tesla, Inc.",
@@ -133,7 +133,7 @@ jobs:
             "purchase price": 194.58,
             "purchase date": "28-11-2022",
             "shares": 32
-          }' http://localhost:5001/stocks
+          }' http://localhost:5001/stocks/
 
           curl -X POST -H "Content-Type: application/json" -d '{
             "name": "Microsoft Corporation",
@@ -141,7 +141,7 @@ jobs:
             "purchase price": 420.55,
             "purchase date": "09-02-2024",
             "shares": 35
-          }' http://localhost:5001/stocks
+          }' http://localhost:5001/stocks/
 
           curl -X POST -H "Content-Type: application/json" -d '{
             "name": "Intel Corporation",
@@ -149,7 +149,7 @@ jobs:
             "purchase price": 19.15,
             "purchase date": "13-01-2025",
             "shares": 10
-          }' http://localhost:5001/stocks
+          }' http://localhost:5001/stocks/
 
           echo "Posted all 6 stocks."
 
@@ -171,9 +171,9 @@ jobs:
 
             # Determine which endpoint to call
             if [ "$service" = "stocks" ]; then
-              res=$(curl -s "http://localhost:5001/stocks?$qs")
+              res=$(curl -s "http://localhost:5001/stocks/?$qs")
             elif [ "$service" = "capital-gains" ] || [ "$service" = "capital gains" ]; then
-              res=$(curl -s "http://localhost:5003/capital-gains?$qs")
+              res=$(curl -s "http://localhost:5003/capital-gains/?$qs")
             else
               res="Invalid service"
             fi
@@ -200,11 +200,12 @@ jobs:
           echo "Alon Gerby" >> $LOG_FILE
 
           # Check if the build job succeeded; if not, output only lines 1-3 and exit.
-          if [ -z "${{ needs.build.outputs.build_status }}" ]; then
+          build_status="${{ needs.build.outputs.build_status }}"
+          if [ -z "$build_status" ]; then
             echo "image not able to be built" >> $LOG_FILE
             exit 0
           else
-            echo "${{ needs.build.outputs.build_status }}" >> $LOG_FILE
+            echo $build_status >> $LOG_FILE
           fi
 
           # Check if the container startup succeeded; if not, output line 4 and exit.
