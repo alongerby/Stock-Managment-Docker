@@ -188,6 +188,7 @@ jobs:
           done < query.txt
 
       - name: Upload Query Response Artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: response.txt
