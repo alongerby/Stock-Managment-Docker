@@ -89,6 +89,9 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
+      - env:
+          BUILD_STATUS: ${{needs.build.outputs.build_status}}
+        run: echo "$BUILD_STATUS"
       - name: Checkout Repository
         uses: actions/checkout@v3
 
@@ -200,12 +203,11 @@ jobs:
           echo "Alon Gerby" >> $LOG_FILE
 
           # Check if the build job succeeded; if not, output only lines 1-3 and exit.
-          build_status="${{ needs.build.outputs.build_status }}"
-          if [ -z "$build_status" ]; then
+          if [ -z "$BUILD_STATUS" ]; then
             echo "image not able to be built" >> $LOG_FILE
             exit 0
           else
-            echo $build_status >> $LOG_FILE
+            echo $BUILD_STATUS >> $LOG_FILE
           fi
 
           # Check if the container startup succeeded; if not, output line 4 and exit.
