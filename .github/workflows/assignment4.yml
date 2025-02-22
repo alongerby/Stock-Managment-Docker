@@ -22,7 +22,7 @@ jobs:
 
       - name: Build Docker Images via Docker Compose
         run: |
-          docker-compose build
+          docker compose build
         # (If the build fails, the job will error and the log will only include the prior lines.)
 
       - name: Set Build Status
@@ -44,7 +44,7 @@ jobs:
 
       - name: Start Application Containers
         run: |
-          docker-compose up -d
+          docker compose up -d
           # Pause briefly to let containers start
           sleep 10
 
@@ -80,7 +80,7 @@ jobs:
 
       - name: Start Containers for Query Job
         run: |
-          docker-compose up -d
+          docker compose up -d
           sleep 10
 
       - name: Run Query Job and Generate Response File
