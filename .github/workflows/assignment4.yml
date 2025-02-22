@@ -155,7 +155,7 @@ jobs:
 
       - name: Start Containers for Query Job
         run: |
-          docker compose up -d
+          docker-compose up -d
           sleep 10
 
       - name: Run Query Job and Generate Response File
