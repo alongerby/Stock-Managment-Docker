@@ -123,18 +123,18 @@ jobs:
         if: always()
         run: |
           LOG_FILE="log.txt"
-          if [ -z "${{ needs.test.outputs.container_status }}" ]; then
+          if [ -z "${{ steps.set_container_status.outputs.container_status }}" ]; then
             echo "Container failed to run" >> $LOG_FILE
             exit 0
           else
-            echo "${{ needs.test.outputs.container_status }}" >> $LOG_FILE
+            echo "${{ steps.set_container_status.outputs.container_status }}" >> $LOG_FILE
           fi
 
           # Finally, output test status (line 5); if not set, mark tests as failed.
-          if [ -z "${{ needs.test.outputs.test_status }}" ]; then
+          if [ -z "${{ steps.set_test_status.outputs.test_status }}" ]; then
             echo "tests failed" >> $LOG_FILE
           else
-            echo "${{ needs.test.outputs.test_status }}" >> $LOG_FILE
+            echo "${{ steps.set_test_status.outputs.test_status }}" >> $LOG_FILE
           fi
 
       - name: Upload Log File Artifact
