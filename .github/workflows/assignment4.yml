@@ -175,7 +175,7 @@ jobs:
             # Determine which endpoint to call
             if [ "$service" = "stocks" ]; then
               res=$(curl -s "http://localhost:5001/stocks/?$qs")
-            elif [ "$service" = "capital-gains" ] || [ "$service" = "capital gains" ]; then
+            elif [ "$service" = "capital-gains" ]; then
               res=$(curl -s "http://localhost:5003/capital-gains/?$qs")
             else
               res="Invalid service"
