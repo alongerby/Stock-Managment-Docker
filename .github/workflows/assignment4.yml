@@ -155,12 +155,11 @@ jobs:
           }' http://localhost:5001/stocks/
 
           echo "Posted all 6 stocks."
-          response=$(curl -s "http://localhost:5001/stocks/")
-          echo "Response: $response"
 
           ###################################################################
           # STEP 2: Read each line in query.txt and execute GET requests
           ###################################################################
+          
           if [ ! -f query.txt ]; then
             echo "query.txt not found. Please add a query.txt file in the repo."
             exit 1
@@ -170,7 +169,6 @@ jobs:
           > response.txt
 
           while IFS= read -r line; do
-            # Example line: "stocks:sharesgt=10"
             service=$(echo "$line" | cut -d':' -f1 | tr -d ' ')
             qs=$(echo "$line" | cut -d':' -f2- | xargs)
 
