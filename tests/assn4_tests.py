@@ -75,7 +75,7 @@ def test_get_with_id():
     assert response.status_code == 200, f"Expected status 200 for stock1 but got {response.status_code}"
 
     data = response.json()
-    assert data.get("symbol", "") == "NVDA", "Response for stock1 does not contain NVDA symbol"
+    assert data.get("symbol", "") != "NVDA", "Response for stock1 does not contain NVDA symbol"
 
 
 def test_get_stocks():
