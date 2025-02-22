@@ -81,7 +81,7 @@ def test_get_with_id():
 def test_get_stocks():
     response = requests.get(stocks_url)
 
-    assert response == 200, f"Expected status 200 for get stocks but got {response.status_code}"
+    assert response.status_code == 200, f"Expected status 200 for get stocks but got {response.status_code}"
     data = response.json()
 
     assert len(data) == 3, f"Expected 3 embedded JSON objects, but got {len(data)}"
