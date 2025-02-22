@@ -89,9 +89,6 @@ jobs:
     needs: [test, build]
     runs-on: ubuntu-latest
     steps:
-      - env:
-          BUILD_STATUS: ${{needs.build.outputs.build_status}}
-        run: echo "$BUILD_STATUS"
       - name: Checkout Repository
         uses: actions/checkout@v3
 
@@ -198,10 +195,11 @@ jobs:
         if: always()
         env:
           BUILD_STATUS: ${{ needs.build.outputs.build_status }}
+          START_TIME: ${{ needs.build.outputs.start_time }}
         run: |
           LOG_FILE="log.txt"
           # Line 1: current time (ISO minutes)
-          date -Iminutes > $LOG_FILE
+          $START_TIME > $LOG_FILE
           # Line 2: submitter names (update with your actual names)
           echo "Alon Gerby" >> $LOG_FILE
 
