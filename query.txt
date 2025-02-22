@@ -1,6 +1,6 @@
-stocks:sharesgt=10
-stocks:shareslt=20
-stocks:sharesgt=5&shareslt=30
+stocks:shares=10
+stocks:shares=32
+stocks:shares=14&purchase price=140.12
 capital-gains:numsharesgt=15
 capital-gains:numshareslt=25
 capital-gains:numsharesgt=10&numshareslt=20
