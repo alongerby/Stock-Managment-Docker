@@ -1,1 +1,138 @@
-work_flow_displatch
+name: assignment4
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    outputs:
+      build_status: ${{ steps.set_build_status.outputs.build_status }}
+      start_time: ${{ steps.get_start_time.outputs.start_time }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Get Workflow Start Time
+        id: get_start_time
+        run: |
+          # Capture the start time in ISO minutes format
+          echo "start_time=$(date -Iminutes)" >> $GITHUB_OUTPUT
+
+      - name: Build Docker Images via Docker Compose
+        run: |
+          docker-compose build
+        # (If the build fails, the job will error and the log will only include the prior lines.)
+
+      - name: Set Build Status
+        id: set_build_status
+        run: |
+          # If we reached here, assume images built successfully.
+          echo "build_status=image successfully built" >> $GITHUB_OUTPUT
+
+  test:
+    name: Test Application
+    needs: build
+    runs-on: ubuntu-latest
+    outputs:
+      container_status: ${{ steps.set_container_status.outputs.container_status }}
+      test_status: ${{ steps.set_test_status.outputs.test_status }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Start Application Containers
+        run: |
+          docker-compose up -d
+          # Pause briefly to let containers start
+          sleep 10
+
+      - name: Run Pytest Tests
+        id: run_tests
+        run: |
+          # Run tests and capture output in a file
+          pytest -v tests/assn4_tests.py > assn4_test_results.txt
+
+      - name: Set Container Status
+        id: set_container_status
+        run: |
+          echo "container_status=Container up and running" >> $GITHUB_OUTPUT
+
+      - name: Set Test Status
+        id: set_test_status
+        run: |
+          echo "test_status=tests succeeded" >> $GITHUB_OUTPUT
+
+      - name: Upload Pytest Results Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: assn4_test_results.txt
+          path: assn4_test_results.txt
+
+  query:
+    name: Run Query Job and Finalize Log
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Start Containers for Query Job
+        run: |
+          docker-compose up -d
+          sleep 10
+
+      - name: Run Query Job and Generate Response File
+        id: run_query
+        run: |
+          # Ensure query.txt exists; it should contain lines like:
+          # stocks:sharesgt=10
+          # capital gains:portfolio=stocks1
+          if [ ! -f query.txt ]; then
+            echo "query.txt not found. Please add a query.txt file in the repo."
+            exit 1
+          fi
+          > response.txt
+          while IFS= read -r line; do
+            # Split the line into service and query string (assumes format: service:query)
+            service=$(echo "$line" | cut -d':' -f1 | tr -d ' ')
+            qs=$(echo "$line" | cut -d':' -f2- | xargs)
+            if [ "$service" = "stocks" ]; then
+              res=$(curl -s "http://localhost:5001/stocks?$qs")
+            elif [ "$service" = "capitalgains" ] || [ "$service" = "capital gains" ]; then
+              res=$(curl -s "http://localhost:5003/capital-gains?$qs")
+            else
+              res="Invalid service"
+            fi
+            echo "query: $line" >> response.txt
+            echo "response:" >> response.txt
+            echo "$res" >> response.txt
+          done < query.txt
+
+      - name: Upload Query Response Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: response.txt
+          path: response.txt
+
+      - name: Generate Final Log File
+        run: |
+          {
+            # Line 1: current time (ISO minutes)
+            date -Iminutes
+            # Line 2: submitter names (update with your actual names)
+            echo "Alon Gerby"
+            # Line 3: build status from build job
+            echo "${{ needs.build.outputs.build_status }}"
+            # Line 4: container status from test job
+            echo "${{ needs.test.outputs.container_status }}"
+            # Line 5: test status from test job
+            echo "${{ needs.test.outputs.test_status }}"
+          } > log.txt
+
+      - name: Upload Log File Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: log.txt
+          path: log.txt
