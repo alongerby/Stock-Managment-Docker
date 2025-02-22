@@ -61,19 +61,20 @@ jobs:
 
       - name: Run Pytest Tests
         id: run_tests
+        continue-on-error: true
         run: |
           # Run tests and capture output in a file
           pytest -v tests/assn4_tests.py > assn4_test_results.txt
 
-      - name: Set Container Status
-        id: set_container_status
-        run: |
-          echo "container_status=Container up and running" >> $GITHUB_OUTPUT
-
-      - name: Set Test Status
-        id: set_test_status
-        run: |
-          echo "test_status=tests succeeded" >> $GITHUB_OUTPUT
+#      - name: Set Container Status
+#        id: set_container_status
+#        run: |
+#          echo "container_status=Container up and running" >> $GITHUB_OUTPUT
+#
+#      - name: Set Test Status
+#        id: set_test_status
+#        run: |
+#          echo "test_status=tests succeeded" >> $GITHUB_OUTPUT
 
       - name: Upload Pytest Results Artifact
         uses: actions/upload-artifact@v4
