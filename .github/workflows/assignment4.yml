@@ -86,7 +86,7 @@ jobs:
 
   query:
     name: Run Query Job and Finalize Log
-    needs: test
+    needs: [test, build]
     runs-on: ubuntu-latest
     steps:
       - env:
