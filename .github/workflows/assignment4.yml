@@ -88,18 +88,76 @@ jobs:
       - name: Run Query Job and Generate Response File
         id: run_query
         run: |
-          # Ensure query.txt exists; it should contain lines like:
-          # stocks:sharesgt=10
-          # capital gains:portfolio=stocks1
+          ###################################################################
+          # STEP 1: Execute 6 POST /stocks requests for stock1..stock6
+          ###################################################################
+          curl -X POST -H "Content-Type: application/json" -d '{
+            "name": "NVIDIA Corporation",
+            "symbol": "NVDA",
+            "purchase price": 134.66,
+            "purchase date": "18-06-2024",
+            "shares": 7
+          }' http://localhost:5001/stocks
+
+          curl -X POST -H "Content-Type: application/json" -d '{
+            "name": "Apple Inc.",
+            "symbol": "AAPL",
+            "purchase price": 183.63,
+            "purchase date": "22-02-2024",
+            "shares": 19
+          }' http://localhost:5001/stocks
+
+          curl -X POST -H "Content-Type: application/json" -d '{
+            "name": "Alphabet Inc.",
+            "symbol": "GOOG",
+            "purchase price": 140.12,
+            "purchase date": "24-10-2024",
+            "shares": 14
+          }' http://localhost:5001/stocks
+
+          curl -X POST -H "Content-Type: application/json" -d '{
+            "name": "Tesla, Inc.",
+            "symbol": "TSLA",
+            "purchase price": 194.58,
+            "purchase date": "28-11-2022",
+            "shares": 32
+          }' http://localhost:5001/stocks
+
+          curl -X POST -H "Content-Type: application/json" -d '{
+            "name": "Microsoft Corporation",
+            "symbol": "MSFT",
+            "purchase price": 420.55,
+            "purchase date": "09-02-2024",
+            "shares": 35
+          }' http://localhost:5001/stocks
+
+          curl -X POST -H "Content-Type: application/json" -d '{
+            "name": "Intel Corporation",
+            "symbol": "INTC",
+            "purchase price": 19.15,
+            "purchase date": "13-01-2025",
+            "shares": 10
+          }' http://localhost:5001/stocks
+
+          echo "Posted all 6 stocks."
+
+          ###################################################################
+          # STEP 2: Read each line in query.txt and execute GET requests
+          ###################################################################
           if [ ! -f query.txt ]; then
             echo "query.txt not found. Please add a query.txt file in the repo."
             exit 1
           fi
+
+          # Initialize (truncate) response.txt
           > response.txt
+
           while IFS= read -r line; do
-            # Split the line into service and query string (assumes format: service:query)
+            # Example line: "stocks:sharesgt=10"
             service=$(echo "$line" | cut -d':' -f1 | tr -d ' ')
             qs=$(echo "$line" | cut -d':' -f2- | xargs)
+
+            # Determine which endpoint to call
             if [ "$service" = "stocks" ]; then
               res=$(curl -s "http://localhost:5001/stocks?$qs")
             elif [ "$service" = "capitalgains" ] || [ "$service" = "capital gains" ]; then
@@ -107,6 +165,8 @@ jobs:
             else
               res="Invalid service"
             fi
+
+            # Write to response.txt
             echo "query: $line" >> response.txt
             echo "response:" >> response.txt
             echo "$res" >> response.txt
@@ -155,3 +215,4 @@ jobs:
         with:
           name: log.txt
           path: log.txt
+
