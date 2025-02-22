@@ -171,9 +171,9 @@ jobs:
 
             # Determine which endpoint to call
             if [ "$service" = "stocks" ]; then
-              res=$(curl -s "http://localhost:5001/stocks?$qs")
+              res=$(curl -s "http://localhost:5001/stocks/?$qs")
             elif [ "$service" = "capital-gains" ] || [ "$service" = "capital gains" ]; then
-              res=$(curl -s "http://localhost:5003/capital-gains?$qs")
+              res=$(curl -s "http://localhost:5003/capital-gains/?$qs")
             else
               res="Invalid service"
             fi
@@ -200,11 +200,12 @@ jobs:
           echo "Alon Gerby" >> $LOG_FILE
 
           # Check if the build job succeeded; if not, output only lines 1-3 and exit.
-          if [ -z "${{ needs.build.outputs.build_status }}" ]; then
+          build_status="${{ needs.build.outputs.build_status }}"
+          if [ -z "$build_status" ]; then
             echo "image not able to be built" >> $LOG_FILE
             exit 0
           else
-            echo "${{ needs.build.outputs.build_status }}" >> $LOG_FILE
+            echo $build_status >> $LOG_FILE
           fi
 
           # Check if the container startup succeeded; if not, output line 4 and exit.
