@@ -155,6 +155,8 @@ jobs:
           }' http://localhost:5001/stocks/
 
           echo "Posted all 6 stocks."
+          response=$(curl -s "http://localhost:5001/stocks/")
+          echo "Response: $response"
 
           ###################################################################
           # STEP 2: Read each line in query.txt and execute GET requests
@@ -195,6 +197,8 @@ jobs:
 
       - name: Generate Final Log File
         if: always()
+        env:
+          BUILD_STATUS: ${{ needs.build.outputs.build_status }}
         run: |
           LOG_FILE="log.txt"
           # Line 1: current time (ISO minutes)
