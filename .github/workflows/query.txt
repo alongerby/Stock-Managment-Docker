@@ -1,0 +1,11 @@
+# Stocks queries
+stocks:sharesgt=10
+stocks:shareslt=20
+stocks:sharesgt=5&shareslt=30
+
+# Capital gains queries
+capital-gains:numsharesgt=15
+capital-gains:numshareslt=25
+capital-gains:numsharesgt=10&numshareslt=20
+capital-gains:numsharesgt=5
+capital-gains:numshareslt=30
