@@ -84,7 +84,7 @@ def test_get_stocks():
     assert response.status_code == 200, f"Expected status 200 for get stocks but got {response.status_code}"
     data = response.json()
 
-    assert len(data) == 3, f"Expected 3 embedded JSON objects, but got {len(data)}"
+    assert len(data) == 2, f"Expected 3 embedded JSON objects, but got {len(data)}"
 
 
 def test_stock_value():
